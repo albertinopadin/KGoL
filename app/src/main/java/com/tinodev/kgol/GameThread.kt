@@ -7,6 +7,7 @@ import java.lang.Exception
 class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView): Thread() {
     private var running: Boolean = false
     private val targetFPS = 60
+    private val minWaitTime: Long = 2
 
     fun setRunning(isRunning: Boolean) {
         this.running = isRunning
@@ -16,7 +17,7 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
         var startTime: Long
         var timeMillis: Long
         var waitTime: Long
-        var targetTime = (1000 / targetFPS).toLong()
+        val targetTime = (1000 / targetFPS).toLong()
 
         while (running) {
             startTime = System.nanoTime()
@@ -43,6 +44,10 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
 
             timeMillis = (System.nanoTime() - startTime) / 1_000_000
             waitTime = targetTime - timeMillis
+            if (waitTime < 0) {
+                println("Thread time longer than target time: Thread: $timeMillis, Target: $targetTime")
+                waitTime = minWaitTime
+            }
 
             try {
                 sleep(waitTime)
