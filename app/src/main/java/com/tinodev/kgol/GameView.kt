@@ -13,22 +13,32 @@ class GameView(context: Context, attributes: AttributeSet):
     private val thread: GameThread
     private val cellSize = 28f
     private val cellSpacing = 2f
-    private val cellTotalExtent = cellSize + cellSpacing
+    private val cellTotalExtent: Float = cellSize + cellSpacing
     private val cellGridWidth: Int
     private val cellGridHeight: Int
 
+    private val cellGridWidthAdjustment = 2
+    private val cellGridHeightAdjustment = 6
+
     init {
+        val cgDimensions = getCellGridDimensions()
+        cellGridWidth = cgDimensions.first
+        cellGridHeight = cgDimensions.second
+        println("Grid dimensions: $cellGridWidth x $cellGridHeight")
+        holder.addCallback(this)
+        thread = GameThread(holder, this)
+    }
+
+    private fun getCellGridDimensions(): Pair<Int, Int> {
         val screenWidth = Resources.getSystem().displayMetrics.widthPixels
         val screenHeight = Resources.getSystem().displayMetrics.heightPixels
         println("Screen dimensions: $screenWidth x $screenHeight")
         val cellGridWidthF = Resources.getSystem().displayMetrics.widthPixels / cellTotalExtent
         val cellGridHeightF = Resources.getSystem().displayMetrics.heightPixels / cellTotalExtent
         println("Raw (float) grid dimensions: $cellGridWidthF x $cellGridHeightF")
-        cellGridWidth = (cellGridWidthF).toInt()
-        cellGridHeight = (cellGridHeightF).toInt()
-        println("Grid dimensions: $cellGridWidth x $cellGridHeight")
-        holder.addCallback(this)
-        thread = GameThread(holder, this)
+        val cgWidth = (cellGridWidthF + cellGridWidthAdjustment).toInt()
+        val cgHeight = (cellGridHeightF + cellGridHeightAdjustment).toInt()
+        return Pair(cgWidth, cgHeight)
     }
 
     override fun surfaceCreated(p0: SurfaceHolder) {
@@ -58,19 +68,29 @@ class GameView(context: Context, attributes: AttributeSet):
 
     }
 
+    private fun mDrawSquare(canvas: Canvas?, x: Int, y: Int) {
+        val cellRect = RectF(
+            (x * cellSize) + cellSpacing,
+            (y * cellSize) + cellSpacing,
+            (x * cellSize) + cellSize,
+            (y * cellSize) + cellSize)
+        canvas!!.drawRect(cellRect, PaintUtils.rgbPaints.random())
+    }
+
+    fun mDrawCircle(canvas: Canvas?, x: Int, y: Int) {
+        canvas!!.drawCircle((x * cellSize) + cellSpacing,
+            (y * cellSize) + cellSpacing,
+            cellSize/2,
+            PaintUtils.rgbPaints.random())
+    }
+
     override fun draw(canvas: Canvas?) {
         super.draw(canvas)
 
-//        canvas!!.drawCircle(400.0f, 600.0f, 100f, PaintUtils.blueFillPaint)
-
         for (x in 0..cellGridWidth) {
             for (y in 0..cellGridHeight) {
-                val cellRect = RectF(
-                    (x * cellSize) + cellSpacing,
-                    (y * cellSize) + cellSpacing,
-                    (x * cellSize) + cellSize,
-                    (y * cellSize) + cellSize)
-                canvas!!.drawRect(cellRect, PaintUtils.rgbPaints.random())
+//                mDrawSquare(canvas, x, y)
+                mDrawCircle(canvas, x, y)
             }
         }
     }

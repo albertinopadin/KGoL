@@ -47,6 +47,8 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
             if (waitTime < 0) {
                 println("Thread time longer than target time: Thread: $timeMillis, Target: $targetTime")
                 waitTime = minWaitTime
+            } else {
+                println("Total frame time: $timeMillis")
             }
 
             try {
