@@ -20,11 +20,18 @@ class GameView(context: Context, attributes: AttributeSet):
     private val cellGridWidthAdjustment = 2
     private val cellGridHeightAdjustment = 6
 
+    private val grid: Grid
+    private val gridDimensions: Pair<Int, Int>
+//    private val cellGridWidth: Int
+//    private val cellGridHeight: Int
+
     init {
-        val cgDimensions = getCellGridDimensions()
-        cellGridWidth = cgDimensions.first
-        cellGridHeight = cgDimensions.second
+        this.gridDimensions = getCellGridDimensions()
+        this.cellGridWidth = this.gridDimensions.first
+        this.cellGridHeight = this.gridDimensions.second
         println("Grid dimensions: $cellGridWidth x $cellGridHeight")
+        this.grid = Grid(cellGridWidth, cellGridHeight)
+        this.grid.randomState(0.25f)
         holder.addCallback(this)
         thread = GameThread(holder, this)
     }
@@ -68,7 +75,7 @@ class GameView(context: Context, attributes: AttributeSet):
 
     }
 
-    private fun mDrawSquare(canvas: Canvas?, x: Int, y: Int) {
+    private fun mDrawRandomPaintSquare(canvas: Canvas?, x: Int, y: Int) {
         val cellRect = RectF(
             (x * cellSize) + cellSpacing,
             (y * cellSize) + cellSpacing,
@@ -77,20 +84,37 @@ class GameView(context: Context, attributes: AttributeSet):
         canvas!!.drawRect(cellRect, PaintUtils.rgbPaints.random())
     }
 
-    fun mDrawCircle(canvas: Canvas?, x: Int, y: Int) {
+    fun mDrawRandomPaintCircle(canvas: Canvas?, x: Int, y: Int) {
         canvas!!.drawCircle((x * cellSize) + cellSpacing,
             (y * cellSize) + cellSpacing,
             cellSize/2,
             PaintUtils.rgbPaints.random())
     }
 
+    private fun mDrawSquare(canvas: Canvas?, paint: Paint, x: Int, y: Int) {
+        val cellRect = RectF(
+            (x * cellSize) + cellSpacing,
+            (y * cellSize) + cellSpacing,
+            (x * cellSize) + cellSize,
+            (y * cellSize) + cellSize)
+        canvas!!.drawRect(cellRect, paint)
+    }
+
     override fun draw(canvas: Canvas?) {
         super.draw(canvas)
 
-        for (x in 0..cellGridWidth) {
-            for (y in 0..cellGridHeight) {
-//                mDrawSquare(canvas, x, y)
-                mDrawCircle(canvas, x, y)
+//        for (x in 0..cellGridWidth) {
+//            for (y in 0..cellGridHeight) {
+////                mDrawSquare(canvas, x, y)
+//                mDrawCircle(canvas, x, y)
+//            }
+//        }
+
+        this.grid.update()
+
+        for (x in 0 until this.cellGridWidth) {
+            for (y in 0 until this.cellGridHeight) {
+                mDrawSquare(canvas, this.grid.cells[x + y*this.cellGridWidth].paint, x, y)
             }
         }
     }
